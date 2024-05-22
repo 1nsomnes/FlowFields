@@ -2,7 +2,7 @@
 #include "Dependencies/GLFW/glfw3.h"
 
 static unsigned int CompileShader(unsigned int type, const std::string& source) {
-    unsigned int id = glCreateShader(GL_VERTEX_SHADER);
+    unsigned int id = glCreateShader(type);
     const char* src = &source[0];
     glShaderSource(id, 1, &src, nullptr);
     glCompileShader(id);
@@ -50,8 +50,16 @@ int main()
     if (!glfwInit())
         return -1;
 
+    // must come before "create window," this is because context is only applied to the next createwindow line.
+    // Set all the required options for GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+
     if (!window)
     {
         glfwTerminate();
@@ -74,6 +82,27 @@ int main()
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0,2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+    std::string vertexShader =
+        "#version 330 core\n" // make sure to include "\n" at the end.
+        ""
+        "layout(location = 0) in vec4 position;"
+        ""
+        "void main() {"
+        "   gl_Position = position;"
+        "}";
+
+    std::string fragmentShader =
+        "#version 330 core\n"
+        ""
+        "layout(location = 0) out vec4 color;"
+        ""
+        "void main() {"
+        "   color = vec4(1.0,0.0,.0,1.0);"
+        "}";
+
+    unsigned int shader = CreateShader(vertexShader, fragmentShader);
+    glUseProgram(shader);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
